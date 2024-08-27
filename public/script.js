@@ -1,9 +1,13 @@
-const socket = io('/')
+// const socket = io('/')
+const socket = io('http://localhost:3030', {
+  transports: ['polling']
+});
+
 const videoGrid = document.getElementById('video-grid')
 const myPeer = new Peer(undefined, {
   path: '/peerjs',
   host: '/',
-  port: '443'
+  port: '3030'
 })
 let myVideoStream;
 const myVideo = document.createElement('video')
@@ -24,7 +28,9 @@ navigator.mediaDevices.getUserMedia({
   })
 
   socket.on('user-connected', userId => {
-    connectToNewUser(userId, stream)
+    setTimeout(() => {
+      connectToNewUser(userId, stream);
+    }, 1000); // 1-second delay to ensure the connection is established
   })
   // input value
   let text = $("input");
@@ -42,7 +48,10 @@ navigator.mediaDevices.getUserMedia({
 })
 
 socket.on('user-disconnected', userId => {
-  if (peers[userId]) peers[userId].close()
+  if (peers[userId]) {
+    peers[userId].close();
+    delete peers[userId];
+  }
 })
 
 myPeer.on('open', id => {
